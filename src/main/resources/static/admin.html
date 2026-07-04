@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin | PlacementAI</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      color: white;
+    }
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 3rem;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+    }
+    .logo { font-size: 1.4rem; font-weight: 700; color: #7c6ff7; }
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+    .nav-right span { opacity: 0.7; font-size: 0.9rem; }
+    .btn-logout, .btn-back {
+      background: rgba(255,255,255,0.1);
+      color: white; border: none;
+      padding: 0.5rem 1rem; border-radius: 8px;
+      cursor: pointer; font-size: 0.9rem; text-decoration: none;
+    }
+    .btn-logout:hover, .btn-back:hover { background: rgba(255,255,255,0.2); }
+    .container { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem; }
+    .page-title { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.3rem; }
+    .page-subtitle { opacity: 0.5; margin-bottom: 2rem; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+    .stat {
+      background: rgba(124,111,247,0.15);
+      border: 1px solid rgba(124,111,247,0.3);
+      border-radius: 12px;
+      padding: 1.2rem 1.5rem;
+    }
+    .stat .value { font-size: 2rem; font-weight: 700; color: #7c6ff7; }
+    .stat .label { opacity: 0.6; font-size: 0.85rem; margin-top: 0.2rem; }
+
+    .section-title {
+      font-size: 1.2rem; font-weight: 600;
+      margin: 2rem 0 1rem; opacity: 0.9;
+    }
+
+    .form-box {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 1.8rem;
+      margin-bottom: 2rem;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-group label { font-size: 0.8rem; opacity: 0.6; }
+    .form-group input, .form-group textarea {
+      background: rgba(0,0,0,0.2);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      padding: 0.6rem 0.8rem;
+      color: white;
+      font-size: 0.9rem;
+      font-family: inherit;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+      outline: none; border-color: #7c6ff7;
+    }
+    .full-width { grid-column: 1 / -1; }
+    .btn-submit {
+      background: #7c6ff7;
+      color: white; border: none;
+      padding: 0.7rem 1.5rem;
+      border-radius: 8px;
+      font-size: 0.9rem; font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-submit:hover { background: #6a5ce0; }
+    .form-msg { margin-top: 0.8rem; font-size: 0.85rem; }
+    .form-msg.success { color: #4caf50; }
+    .form-msg.error { color: #f44336; }
+
+    .company-list { display: flex; flex-direction: column; gap: 0.8rem; }
+    .company-row {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 1.2rem 1.5rem;
+      cursor: pointer;
+    }
+    .company-row-header {
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .company-row-header h3 { font-size: 1.05rem; }
+    .company-row-header .meta { font-size: 0.8rem; opacity: 0.4; }
+    .rounds-panel {
+      margin-top: 1rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 1rem;
+      display: none;
+    }
+    .rounds-panel.active { display: block; }
+    .round-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.6rem 0;
+      font-size: 0.88rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .round-item:last-child { border-bottom: none; }
+    .status-pill {
+      font-size: 0.72rem; font-weight: 600;
+      padding: 0.15rem 0.6rem; border-radius: 20px;
+    }
+    .status-PENDING { background: rgba(255,193,7,0.2); color: #ffc107; }
+    .status-PASS { background: rgba(76,175,80,0.2); color: #4caf50; }
+    .status-FAIL { background: rgba(244,67,54,0.2); color: #f44336; }
+    .status-SELECTED { background: rgba(124,111,247,0.3); color: #b3a9fc; }
+    .empty-note { opacity: 0.4; font-size: 0.85rem; padding: 0.5rem 0; }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">🎯 PlacementAI Admin</div>
+    <div class="nav-right">
+      <a href="dashboard.html" class="btn-back">← Dashboard</a>
+      <span id="navUsername"></span>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-title">Admin Panel</div>
+    <div class="page-subtitle">Manage companies and track student placement progress.</div>
+
+    <div class="stats" id="statsGrid">
+      <div class="stat"><div class="value">--</div><div class="label">Total Students</div></div>
+      <div class="stat"><div class="value">--</div><div class="label">Total Companies</div></div>
+      <div class="stat"><div class="value">--</div><div class="label">Active Companies</div></div>
+      <div class="stat"><div class="value">--</div><div class="label">Total Rounds</div></div>
+    </div>
+
+    <div class="section-title">Add New Company</div>
+    <div class="form-box">
+      <form id="companyForm">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Company Name *</label>
+            <input type="text" id="fName" required>
+          </div>
+          <div class="form-group">
+            <label>Website</label>
+            <input type="text" id="fWebsite" placeholder="https://...">
+          </div>
+          <div class="form-group">
+            <label>Minimum CGPA</label>
+            <input type="number" step="0.1" id="fCgpa" placeholder="e.g. 6.5">
+          </div>
+          <div class="form-group">
+            <label>Hiring Schedule</label>
+            <input type="text" id="fSchedule" placeholder="e.g. August 2026">
+          </div>
+          <div class="form-group full-width">
+            <label>Description</label>
+            <input type="text" id="fDescription" placeholder="Short description">
+          </div>
+          <div class="form-group full-width">
+            <label>Eligibility Criteria</label>
+            <input type="text" id="fEligibility" placeholder="e.g. No active backlogs">
+          </div>
+          <div class="form-group full-width">
+            <label>Hiring Roles (comma separated)</label>
+            <input type="text" id="fRoles" placeholder="e.g. Software Engineer, Data Analyst">
+          </div>
+        </div>
+        <button type="submit" class="btn-submit">Add Company</button>
+        <div id="formMsg" class="form-msg"></div>
+      </form>
+    </div>
+
+    <div class="section-title">Companies & Applicants</div>
+    <div class="company-list" id="companyList">
+      <div class="empty-note">Loading companies...</div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem("token");
+    const username = localStorage.getItem("username");
+
+    const role = localStorage.getItem("role");
+    if (!token) window.location.href = "login.html";
+    if (role !== "ADMIN") window.location.href = "dashboard.html";
+    document.getElementById("navUsername").textContent = username || "";
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = "login.html";
+    }
+
+    async function loadStats() {
+      const res = await fetch("/api/admin/dashboard", {
+        headers: { Authorization: "Bearer " + token }
+      });
+      if (!res.ok) {
+        document.getElementById("statsGrid").innerHTML =
+          '<div class="empty-note">Access denied — admin role required.</div>';
+        return;
+      }
+      const stats = await res.json();
+      const grid = document.getElementById("statsGrid");
+      grid.innerHTML = `
+        <div class="stat"><div class="value">${stats.totalStudents}</div><div class="label">Total Students</div></div>
+        <div class="stat"><div class="value">${stats.totalCompanies}</div><div class="label">Total Companies</div></div>
+        <div class="stat"><div class="value">${stats.activeCompanies}</div><div class="label">Active Companies</div></div>
+        <div class="stat"><div class="value">${stats.totalRounds}</div><div class="label">Total Rounds</div></div>
+      `;
+    }
+
+    async function loadCompanies() {
+      const res = await fetch("/api/companies", {
+        headers: { Authorization: "Bearer " + token }
+      });
+      const companies = await res.json();
+      const list = document.getElementById("companyList");
+
+      if (!companies.length) {
+        list.innerHTML = '<div class="empty-note">No companies added yet.</div>';
+        return;
+      }
+
+      list.innerHTML = companies.map(c => `
+        <div class="company-row" onclick="toggleRounds(${c.id}, this)">
+          <div class="company-row-header">
+            <h3>${c.name}</h3>
+            <div class="meta">Min CGPA: ${c.minCgpa ?? "N/A"} · ${c.hiringSchedule || "TBA"}</div>
+          </div>
+          <div class="rounds-panel" id="rounds-${c.id}">
+            <div class="empty-note">Loading applicants...</div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    async function toggleRounds(companyId, rowEl) {
+      const panel = document.getElementById("rounds-" + companyId);
+      const isActive = panel.classList.contains("active");
+
+      document.querySelectorAll(".rounds-panel").forEach(p => p.classList.remove("active"));
+
+      if (isActive) return;
+
+      panel.classList.add("active");
+
+      const res = await fetch(`/api/admin/rounds/company/${companyId}`, {
+        headers: { Authorization: "Bearer " + token }
+      });
+      const rounds = await res.json();
+
+      if (!rounds.length) {
+        panel.innerHTML = '<div class="empty-note">No students have applied yet.</div>';
+        return;
+      }
+
+      panel.innerHTML = rounds.map(r => `
+        <div class="round-item">
+          <span>${r.studentFullName} (@${r.studentUsername}) — ${r.roundType.replace(/_/g, " ")}</span>
+          <span class="status-pill status-${r.status}">${r.status}</span>
+        </div>
+      `).join("");
+    }
+
+    document.getElementById("companyForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById("formMsg");
+      msg.textContent = "";
+      msg.className = "form-msg";
+
+      const payload = {
+        name: document.getElementById("fName").value,
+        description: document.getElementById("fDescription").value,
+        website: document.getElementById("fWebsite").value,
+        eligibility: document.getElementById("fEligibility").value,
+        minCgpa: parseFloat(document.getElementById("fCgpa").value) || null,
+        hiringRoles: document.getElementById("fRoles").value,
+        hiringSchedule: document.getElementById("fSchedule").value,
+        active: true
+      };
+
+      try {
+        const res = await fetch("/api/companies", {
+          method: "POST",
+          headers: {
+            Authorization: "Bearer " + token,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.message || "Failed to add company");
+        }
+
+        msg.textContent = "Company added successfully!";
+        msg.className = "form-msg success";
+        document.getElementById("companyForm").reset();
+        loadCompanies();
+        loadStats();
+      } catch (err) {
+        msg.textContent = err.message;
+        msg.className = "form-msg error";
+      }
+    });
+
+    loadStats();
+    loadCompanies();
+  </script>
+</body>
+</html>

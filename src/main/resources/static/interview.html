@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mock Interview | PlacementAI</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      color: white;
+    }
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 3rem;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+    }
+    .logo { font-size: 1.4rem; font-weight: 700; color: #7c6ff7; }
+    .btn-back {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: none;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2.5rem 2rem; }
+    h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .sub { opacity: 0.5; margin-bottom: 2rem; }
+    .setup-card {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .setup-card h3 { margin-bottom: 1.5rem; opacity: 0.8; }
+    label { font-size: 0.85rem; opacity: 0.7; display: block; margin-bottom: 0.4rem; }
+    input, select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      color: white;
+      font-size: 0.95rem;
+      margin-bottom: 1.2rem;
+      outline: none;
+    }
+    select option { background: #302b63; }
+    .btn-primary {
+      background: #7c6ff7;
+      color: white;
+      border: none;
+      padding: 0.85rem 2rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: #6c5fe6; }
+    .btn-primary:disabled { background: #4a4580; cursor: not-allowed; }
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      display: none;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(124,111,247,0.3);
+      border-top-color: #7c6ff7;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading p { opacity: 0.6; margin-top: 1rem; }
+    .interview-section { display: none; }
+    .question-card {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 1.8rem;
+      margin-bottom: 1.5rem;
+    }
+    .question-card .q-number {
+      color: #7c6ff7;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .question-card .q-text {
+      font-size: 1rem;
+      line-height: 1.7;
+      margin-bottom: 1rem;
+      white-space: pre-line;
+    }
+    textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      color: white;
+      font-size: 0.9rem;
+      resize: vertical;
+      outline: none;
+      min-height: 100px;
+      font-family: inherit;
+    }
+    textarea:focus { border-color: #7c6ff7; }
+    .submit-section { text-align: center; margin-top: 1rem; }
+    .feedback-card {
+      background: rgba(124,111,247,0.1);
+      border: 1px solid rgba(124,111,247,0.3);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-top: 2rem;
+      display: none;
+    }
+    .feedback-card h3 { color: #a78bfa; margin-bottom: 1rem; }
+    .feedback-card p { opacity: 0.75; line-height: 1.8; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">🎯 PlacementAI</div>
+    <a href="dashboard.html" class="btn-back">← Dashboard</a>
+  </nav>
+
+  <div class="container">
+    <h1>🎤 Mock Interview</h1>
+    <p class="sub">Practice with AI-generated questions for your target company</p>
+
+    <!-- Setup -->
+    <div class="setup-card" id="setupCard">
+      <h3>Set up your interview</h3>
+      <label>Target Role</label>
+      <input type="text" id="targetRole" placeholder="e.g. Software Engineer">
+
+      <label>Target Company</label>
+      <select id="targetCompany">
+        <option value="Wipro">Wipro</option>
+        <option value="Affordmed">Affordmed</option>
+        <option value="TCS">TCS</option>
+        <option value="Infosys">Infosys</option>
+        <option value="Accenture">Accenture</option>
+        <option value="Amazon">Amazon</option>
+        <option value="Google">Google</option>
+        <option value="BI3 Technologies">BI3 Technologies</option>
+      </select>
+
+      <button class="btn-primary" id="startBtn" onclick="startInterview()">
+        Generate Interview Questions
+      </button>
+    </div>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>AI is generating your interview questions...</p>
+    </div>
+
+    <!-- Interview Questions -->
+    <div class="interview-section" id="interviewSection">
+      <div id="questionsContainer"></div>
+
+      <div class="submit-section">
+        <button class="btn-primary" onclick="submitAnswers()" id="submitBtn">
+          Submit Answers & Get Feedback
+        </button>
+      </div>
+
+      <div class="feedback-card" id="feedbackCard">
+        <h3>🎯 AI Feedback on Your Answers</h3>
+        <p id="feedbackText"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem("token");
+    if (!token) window.location.href = "login.html";
+
+    let interviewId = null;
+    let questions = [];
+
+    async function startInterview() {
+      const role = document.getElementById("targetRole").value.trim();
+      const company = document.getElementById("targetCompany").value;
+
+      if (!role) {
+        alert("Please enter your target role!");
+        return;
+      }
+
+      document.getElementById("startBtn").disabled = true;
+      document.getElementById("loading").style.display = "block";
+      document.getElementById("setupCard").style.display = "none";
+
+      try {
+        const response = await fetch(
+          `/api/interview/start?targetRole=${encodeURIComponent(role)}&targetCompany=${encodeURIComponent(company)}`,
+          {
+            method: "POST",
+            headers: { "Authorization": "Bearer " + token }
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          alert("Failed to generate questions. Please try again.");
+          document.getElementById("setupCard").style.display = "block";
+          return;
+        }
+
+        interviewId = data.id;
+        const rawQuestions = data.questions;
+        questions = rawQuestions
+          .split(/(?=Q\d+:)/)
+          .map(q => q.trim())
+          .filter(q => q.length > 0);
+
+        const container = document.getElementById("questionsContainer");
+        container.innerHTML = "";
+
+        questions.forEach((q, i) => {
+          container.innerHTML += `
+            <div class="question-card">
+              <div class="q-number">Question ${i + 1}</div>
+              <div class="q-text">${q.replace(/^Q\d+:\s*/, "")}</div>
+              <textarea id="answer${i}" placeholder="Type your answer here..."></textarea>
+            </div>
+          `;
+        });
+
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("interviewSection").style.display = "block";
+
+      } catch (err) {
+        alert("Something went wrong. Please try again.");
+        document.getElementById("setupCard").style.display = "block";
+      } finally {
+        document.getElementById("startBtn").disabled = false;
+        document.getElementById("loading").style.display = "none";
+      }
+    }
+
+    async function submitAnswers() {
+      const answers = questions.map((q, i) => {
+        const ans = document.getElementById(`answer${i}`).value.trim();
+        return `Q${i+1}: ${q.replace(/^Q\d+:\s*/, "")}\nAnswer: ${ans}`;
+      }).join("\n\n");
+
+      document.getElementById("submitBtn").disabled = true;
+      document.getElementById("submitBtn").textContent = "Getting feedback...";
+
+      try {
+        const response = await fetch(`/api/interview/submit/${interviewId}`, {
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "text/plain"
+          },
+          body: answers
+        });
+        const data = await response.json();
+
+        document.getElementById("feedbackText").textContent = data.feedback;
+        document.getElementById("feedbackCard").style.display = "block";
+        document.getElementById("feedbackCard").scrollIntoView({ behavior: "smooth" });
+
+      } catch (err) {
+        alert("Failed to get feedback. Please try again.");
+      } finally {
+        document.getElementById("submitBtn").disabled = false;
+        document.getElementById("submitBtn").textContent = "Submit Answers & Get Feedback";
+      }
+    }
+  </script>
+</body>
+</html>

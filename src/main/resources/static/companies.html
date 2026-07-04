@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Companies | PlacementAI</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      color: white;
+    }
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 3rem;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+    }
+    .logo { font-size: 1.4rem; font-weight: 700; color: #7c6ff7; }
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+    .nav-right span { opacity: 0.7; font-size: 0.9rem; }
+    .btn-logout, .btn-back {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: none;
+    }
+    .btn-logout:hover, .btn-back:hover { background: rgba(255,255,255,0.2); }
+    .container { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem; }
+    .page-title { margin-bottom: 0.3rem; font-size: 1.8rem; font-weight: 700; }
+    .page-subtitle { opacity: 0.5; margin-bottom: 2rem; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .card {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 1.8rem;
+      transition: transform 0.2s;
+      cursor: pointer;
+    }
+    .card:hover { transform: translateY(-4px); border-color: rgba(124,111,247,0.4); }
+    .card h3 { font-size: 1.2rem; margin-bottom: 0.4rem; }
+    .card .badge {
+      display: inline-block;
+      background: rgba(124,111,247,0.2);
+      color: #b3a9fc;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      margin-bottom: 0.6rem;
+    }
+    .card p { opacity: 0.5; font-size: 0.88rem; line-height: 1.6; margin-bottom: 0.8rem; }
+    .card .meta { font-size: 0.8rem; opacity: 0.4; }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 1rem;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: #1e1b3a;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      max-width: 500px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.2rem;
+    }
+    .modal-header h2 { font-size: 1.4rem; }
+    .modal-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.4rem;
+      cursor: pointer;
+      opacity: 0.6;
+    }
+    .modal-close:hover { opacity: 1; }
+    .modal-section { margin-bottom: 1.2rem; }
+    .modal-section .label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.4;
+      margin-bottom: 0.3rem;
+    }
+    .modal-section .value { font-size: 0.95rem; line-height: 1.5; }
+    .modal-section a { color: #7c6ff7; }
+
+    .status-box {
+      background: rgba(124,111,247,0.15);
+      border: 1px solid rgba(124,111,247,0.3);
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1.2rem;
+    }
+    .status-pill {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.7rem;
+      border-radius: 20px;
+      margin-top: 0.3rem;
+    }
+    .status-PENDING { background: rgba(255,193,7,0.2); color: #ffc107; }
+    .status-PASS { background: rgba(76,175,80,0.2); color: #4caf50; }
+    .status-FAIL { background: rgba(244,67,54,0.2); color: #f44336; }
+    .status-SELECTED { background: rgba(124,111,247,0.3); color: #b3a9fc; }
+
+    .empty-state { text-align: center; opacity: 0.4; padding: 3rem 0; }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">🎯 PlacementAI</div>
+    <div class="nav-right">
+      <a href="dashboard.html" class="btn-back">← Dashboard</a>
+      <span id="navUsername"></span>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-title">Companies Hiring</div>
+    <div class="page-subtitle">Browse companies visiting your campus and track your progress.</div>
+
+    <div class="grid" id="companiesGrid">
+      <div class="empty-state">Loading companies...</div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalCompanyName"></h2>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+
+      <div id="myStatusBox"></div>
+
+      <div class="modal-section">
+        <div class="label">Description</div>
+        <div class="value" id="modalDescription"></div>
+      </div>
+      <div class="modal-section">
+        <div class="label">Eligibility</div>
+        <div class="value" id="modalEligibility"></div>
+      </div>
+      <div class="modal-section">
+        <div class="label">Minimum CGPA</div>
+        <div class="value" id="modalCgpa"></div>
+      </div>
+      <div class="modal-section">
+        <div class="label">Hiring Roles</div>
+        <div class="value" id="modalRoles"></div>
+      </div>
+      <div class="modal-section">
+        <div class="label">Hiring Schedule</div>
+        <div class="value" id="modalSchedule"></div>
+      </div>
+      <div class="modal-section">
+        <div class="label">Website</div>
+        <div class="value"><a id="modalWebsite" href="#" target="_blank"></a></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem("token");
+    const username = localStorage.getItem("username");
+
+    if (!token) {
+      window.location.href = "login.html";
+    }
+
+    document.getElementById("navUsername").textContent = username || "";
+
+    let myRounds = [];
+
+    async function loadCompanies() {
+      try {
+        const [companiesRes, roundsRes] = await Promise.all([
+          fetch("/api/companies/active", {
+            headers: { Authorization: "Bearer " + token }
+          }),
+          fetch("/api/rounds/my", {
+            headers: { Authorization: "Bearer " + token }
+          })
+        ]);
+
+        const companies = await companiesRes.json();
+        myRounds = roundsRes.ok ? await roundsRes.json() : [];
+
+        renderCompanies(companies);
+      } catch (err) {
+        document.getElementById("companiesGrid").innerHTML =
+          '<div class="empty-state">Failed to load companies. Please try again.</div>';
+      }
+    }
+
+    function renderCompanies(companies) {
+      const grid = document.getElementById("companiesGrid");
+
+      if (!companies.length) {
+        grid.innerHTML = '<div class="empty-state">No companies listed yet.</div>';
+        return;
+      }
+
+      grid.innerHTML = companies.map(c => {
+        const myRound = myRounds.find(r => r.company.id === c.id);
+        const statusBadge = myRound
+          ? `<span class="badge">Your status: ${myRound.status}</span>`
+          : `<span class="badge">Not applied yet</span>`;
+
+        return `
+          <div class="card" onclick='openModal(${JSON.stringify(c).replace(/'/g, "&apos;")})'>
+            ${statusBadge}
+            <h3>${c.name}</h3>
+            <p>${c.description || "No description available."}</p>
+            <div class="meta">Min CGPA: ${c.minCgpa ?? "N/A"} · ${c.hiringSchedule || "TBA"}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function openModal(company) {
+      document.getElementById("modalCompanyName").textContent = company.name;
+      document.getElementById("modalDescription").textContent = company.description || "—";
+      document.getElementById("modalEligibility").textContent = company.eligibility || "—";
+      document.getElementById("modalCgpa").textContent = company.minCgpa ?? "—";
+      document.getElementById("modalRoles").textContent = company.hiringRoles || "—";
+      document.getElementById("modalSchedule").textContent = company.hiringSchedule || "—";
+
+      const websiteEl = document.getElementById("modalWebsite");
+      websiteEl.textContent = company.website || "—";
+      websiteEl.href = company.website || "#";
+
+      const myRound = myRounds.find(r => r.company.id === company.id);
+      const statusBox = document.getElementById("myStatusBox");
+      if (myRound) {
+        statusBox.innerHTML = `
+          <div class="status-box">
+            <div style="font-size:0.85rem; opacity:0.6;">Your current round</div>
+            <div style="font-weight:600; margin-top:0.2rem;">${myRound.roundType.replace(/_/g, " ")}</div>
+            <span class="status-pill status-${myRound.status}">${myRound.status}</span>
+            ${myRound.remarks ? `<div style="margin-top:0.6rem; font-size:0.85rem; opacity:0.7;">${myRound.remarks}</div>` : ""}
+          </div>
+        `;
+      } else {
+        statusBox.innerHTML = "";
+      }
+
+      document.getElementById("modalOverlay").classList.add("active");
+    }
+
+    function closeModal() {
+      document.getElementById("modalOverlay").classList.remove("active");
+    }
+
+    document.getElementById("modalOverlay").addEventListener("click", (e) => {
+      if (e.target.id === "modalOverlay") closeModal();
+    });
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = "login.html";
+    }
+
+    loadCompanies();
+  </script>
+</body>
+</html>

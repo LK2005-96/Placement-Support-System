@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Plan | PlacementAI</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      color: white;
+    }
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 3rem;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+    }
+    .logo { font-size: 1.4rem; font-weight: 700; color: #7c6ff7; }
+    .btn-back {
+      background: rgba(255,255,255,0.1);
+      color: white; border: none;
+      padding: 0.5rem 1rem; border-radius: 8px;
+      cursor: pointer; font-size: 0.9rem; text-decoration: none;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2.5rem 2rem; }
+    h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .sub { opacity: 0.5; margin-bottom: 2rem; }
+
+    .empty-card, .propose-card {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 2.5rem;
+      text-align: center;
+    }
+    .empty-card p { opacity: 0.6; margin-bottom: 1.5rem; line-height: 1.6; }
+
+    .btn-primary {
+      background: #7c6ff7; color: white; border: none;
+      padding: 0.85rem 2rem; border-radius: 10px;
+      font-size: 1rem; font-weight: 600; cursor: pointer;
+    }
+    .btn-primary:hover { background: #6c5fe6; }
+    .btn-primary:disabled { background: #4a4580; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.1); color: white; border: none;
+      padding: 0.85rem 2rem; border-radius: 10px;
+      font-size: 1rem; font-weight: 600; cursor: pointer;
+      margin-left: 0.8rem;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.2); }
+
+    .loading { text-align: center; padding: 3rem; }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid rgba(124,111,247,0.3);
+      border-top-color: #7c6ff7;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .plan-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .progress-bar {
+      background: rgba(255,255,255,0.1);
+      border-radius: 20px;
+      height: 10px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+    .progress-fill {
+      background: #7c6ff7;
+      height: 100%;
+      transition: width 0.3s;
+    }
+    .progress-label { font-size: 0.85rem; opacity: 0.6; margin-bottom: 2rem; }
+
+    .day-row {
+      display: flex; align-items: flex-start; gap: 1rem;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 0.7rem;
+    }
+    .day-row.completed { opacity: 0.5; }
+    .day-row.overdue { border-color: rgba(244,67,54,0.5); background: rgba(244,67,54,0.07); }
+    .day-checkbox {
+      width: 22px; height: 22px;
+      border-radius: 6px;
+      border: 2px solid rgba(255,255,255,0.3);
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 2px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+    .day-row.completed .day-checkbox {
+      background: #7c6ff7; border-color: #7c6ff7;
+    }
+    .day-content { flex: 1; }
+    .day-number { font-size: 0.75rem; color: #a78bfa; font-weight: 600; margin-bottom: 0.2rem; }
+    .day-task { font-size: 0.92rem; line-height: 1.5; }
+    .day-due { font-size: 0.75rem; opacity: 0.4; margin-top: 0.3rem; }
+    .overdue-tag {
+      display: inline-block;
+      background: rgba(244,67,54,0.2);
+      color: #f44336;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.1rem 0.5rem;
+      border-radius: 10px;
+      margin-left: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">🎯 PlacementAI</div>
+    <a href="dashboard.html" class="btn-back">← Dashboard</a>
+  </nav>
+
+  <div class="container">
+    <h1>📅 Study Plan</h1>
+    <p class="sub">Your personalized 30-day plan to close skill gaps.</p>
+
+    <div id="content">
+      <div class="loading"><div class="spinner"></div><p>Loading...</p></div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem("token");
+    if (!token) window.location.href = "login.html";
+
+    const content = document.getElementById("content");
+
+    async function loadPlan() {
+      const res = await fetch("/api/studyplan/current", {
+        headers: { Authorization: "Bearer " + token }
+      });
+
+      if (res.status === 204) {
+        renderEmptyState();
+        return;
+      }
+
+      const plan = await res.json();
+
+      if (plan.status === "PROPOSED") {
+        renderProposedState(plan);
+      } else {
+        renderAcceptedState(plan);
+      }
+    }
+
+    function renderEmptyState() {
+      content.innerHTML = `
+        <div class="empty-card">
+          <p>You don't have a study plan yet. Generate one based on your latest resume's skill gap analysis, and we'll track your daily progress.</p>
+          <button class="btn-primary" onclick="generatePlan()" id="genBtn">Generate My 30-Day Plan</button>
+        </div>
+      `;
+    }
+
+    async function generatePlan() {
+      const btn = document.getElementById("genBtn");
+      btn.disabled = true;
+      btn.textContent = "Generating... this may take up to a minute";
+
+      try {
+        const res = await fetch("/api/studyplan/generate", {
+          method: "POST",
+          headers: { Authorization: "Bearer " + token }
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          alert(data.message || "Failed to generate plan. Have you uploaded your resume yet?");
+          btn.disabled = false;
+          btn.textContent = "Generate My 30-Day Plan";
+          return;
+        }
+
+        renderProposedState(data);
+      } catch (err) {
+        alert("Something went wrong.");
+        btn.disabled = false;
+        btn.textContent = "Generate My 30-Day Plan";
+      }
+    }
+
+    function renderProposedState(plan) {
+      content.innerHTML = `
+        <div class="propose-card">
+          <p style="opacity:0.6; margin-bottom:1.5rem;">Your 30-day plan is ready. Review it below, then accept to start tracking, or cancel to discard.</p>
+          <div style="text-align:left; max-height:400px; overflow-y:auto; margin-bottom:1.5rem;">
+            ${plan.days.map(d => `
+              <div class="day-row">
+                <div class="day-content">
+                  <div class="day-number">Day ${d.dayNumber}</div>
+                  <div class="day-task">${d.task}</div>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+          <button class="btn-primary" onclick="acceptPlan(${plan.id})">Accept & Start Tracking</button>
+          <button class="btn-secondary" onclick="cancelPlan(${plan.id})">Cancel</button>
+        </div>
+      `;
+    }
+
+    async function acceptPlan(id) {
+      const res = await fetch(`/api/studyplan/${id}/accept`, {
+        method: "POST",
+        headers: { Authorization: "Bearer " + token }
+      });
+      const data = await res.json();
+      renderAcceptedState(data);
+    }
+
+    async function cancelPlan(id) {
+      await fetch(`/api/studyplan/${id}/cancel`, {
+        method: "POST",
+        headers: { Authorization: "Bearer " + token }
+      });
+      renderEmptyState();
+    }
+
+    function renderAcceptedState(plan) {
+      const completedCount = plan.days.filter(d => d.completed).length;
+      const percent = Math.round((completedCount / plan.days.length) * 100);
+
+      content.innerHTML = `
+        <div class="plan-header">
+          <div>
+            <div style="font-size:1.3rem; font-weight:700;">${completedCount} / ${plan.days.length} days complete</div>
+          </div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${percent}%"></div></div>
+        <div class="progress-label">${percent}% through your plan</div>
+        <div id="daysList"></div>
+      `;
+
+      const daysList = document.getElementById("daysList");
+      daysList.innerHTML = plan.days.map(d => `
+        <div class="day-row ${d.completed ? "completed" : ""} ${d.overdue ? "overdue" : ""}" onclick="toggleDay(${d.id})">
+          <div class="day-checkbox">${d.completed ? "✓" : ""}</div>
+          <div class="day-content">
+            <div class="day-number">Day ${d.dayNumber} ${d.overdue ? '<span class="overdue-tag">Overdue</span>' : ""}</div>
+            <div class="day-task">${d.task}</div>
+            <div class="day-due">Due: ${d.dueDate}</div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    async function toggleDay(dayId) {
+      const res = await fetch(`/api/studyplan/day/${dayId}/toggle`, {
+        method: "POST",
+        headers: { Authorization: "Bearer " + token }
+      });
+      const data = await res.json();
+      renderAcceptedState(data);
+    }
+
+    loadPlan();
+  </script>
+</body>
+</html>

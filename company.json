@@ -1,0 +1,10 @@
+﻿{
+  "name": "Wipro",
+  "description": "IT services company",
+  "website": "https://wipro.com",
+  "eligibility": "No active backlogs",
+  "minCgpa": 6.5,
+  "hiringRoles": "Software Engineer, Project Engineer",
+  "hiringSchedule": "July 2026",
+  "active": true
+}

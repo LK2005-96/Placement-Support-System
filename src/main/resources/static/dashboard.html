@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | PlacementAI</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      color: white;
+    }
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 3rem;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+    }
+    .logo { font-size: 1.4rem; font-weight: 700; color: #7c6ff7; }
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+    .nav-right span { opacity: 0.7; font-size: 0.9rem; }
+    .btn-logout {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .btn-logout:hover { background: rgba(255,255,255,0.2); }
+    .container { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem; }
+    .welcome { margin-bottom: 2rem; }
+    .welcome h1 { font-size: 1.8rem; font-weight: 700; }
+    .welcome p { opacity: 0.5; margin-top: 0.3rem; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .card {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 1.8rem;
+      transition: transform 0.2s;
+      cursor: pointer;
+      text-decoration: none;
+      color: white;
+      display: block;
+    }
+    .card:hover { transform: translateY(-4px); }
+    .card .icon { font-size: 2.2rem; margin-bottom: 1rem; }
+    .card h3 { font-size: 1.1rem; margin-bottom: 0.4rem; }
+    .card p { opacity: 0.5; font-size: 0.88rem; line-height: 1.6; }
+    .card .arrow {
+      margin-top: 1.2rem;
+      color: #7c6ff7;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+    .stat {
+      background: rgba(124,111,247,0.15);
+      border: 1px solid rgba(124,111,247,0.3);
+      border-radius: 12px;
+      padding: 1.2rem 1.5rem;
+    }
+    .stat .value { font-size: 2rem; font-weight: 700; color: #7c6ff7; }
+    .stat .label { opacity: 0.6; font-size: 0.85rem; margin-top: 0.2rem; }
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">🎯 PlacementAI</div>
+    <div class="nav-right">
+      <span id="navUsername"></span>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="welcome">
+      <h1>Welcome back, <span id="welcomeName"></span> 👋</h1>
+      <p>Continue your placement preparation from where you left off.</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="value" id="atsScore">--</div>
+        <div class="label">ATS Resume Score</div>
+      </div>
+      <div class="stat">
+        <div class="value" id="interviewCount">--</div>
+        <div class="label">Mock Interviews Done</div>
+      </div>
+      <div class="stat">
+        <div class="value">4</div>
+        <div class="label">Features Available</div>
+      </div>
+    </div>
+
+    <div class="section-title">What would you like to do today?</div>
+
+    <div class="grid">
+      <a href="resume.html" class="card">
+        <div class="icon">📄</div>
+        <h3>Resume Review</h3>
+        <p>Upload your resume and get AI-powered ATS score, feedback, skill gap analysis and personalized roadmap.</p>
+        <div class="arrow">Upload Resume →</div>
+      </a>
+      <a href="interview.html" class="card">
+        <div class="icon">🎤</div>
+        <h3>Mock Interview</h3>
+        <p>Practice with AI-generated technical and HR questions specific to your target company.</p>
+        <div class="arrow">Start Interview →</div>
+      </a>
+      <a href="coding.html" class="card">
+        <div class="icon">💻</div>
+        <h3>Coding Practice</h3>
+        <p>Get company-specific coding topics and problem recommendations based on your target role.</p>
+        <div class="arrow">Get Problems →</div>
+      </a>
+       <a href="companies.html" class="card">
+       <div class="icon">🏢</div>
+       <h3>Companies Hiring</h3>
+       <p>Browse companies visiting your campus, view eligibility criteria, and track your placement round status.</p>
+       <div class="arrow">View Companies →</div>
+      </a>
+      <a href="studyplan.html" class="card">
+       <div class="icon">📅</div>
+       <h3>Study Plan</h3>
+       <p>Get a personalized 30-day study plan based on your skill gap, and track your daily progress.</p>
+       <div class="arrow">View Plan →</div>
+      </a>
+      <a href="resume.html" class="card">
+        <div class="icon">🗺️</div>
+        <h3>Learning Roadmap</h3>
+        <p>View your personalized week-by-week learning plan generated from your resume analysis.</p>
+        <div class="arrow">View Roadmap →</div>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // Check if logged in
+    const token = localStorage.getItem("token");
+    const username = localStorage.getItem("username");
+    const fullName = localStorage.getItem("fullName");
+
+    if (!token) {
+      window.location.href = "login.html";
+    }
+    if (localStorage.getItem("role") === "ADMIN") {
+      window.location.href = "admin.html";
+    }
+    checkReminders();
+
+    async function checkReminders() {
+      try {
+        const res = await fetch("/api/studyplan/reminders", {
+          headers: { Authorization: "Bearer " + token }
+        });
+        if (!res.ok) return;
+
+        const overdueDays = await res.json();
+        if (overdueDays.length === 0) return;
+
+        showReminderPopup(overdueDays);
+      } catch (err) {
+        // silently ignore, don't block dashboard load over this
+      }
+    }
+
+    function showReminderPopup(overdueDays) {
+      const overlay = document.createElement("div");
+      overlay.style.cssText = `
+        position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+        display: flex; align-items: center; justify-content: center;
+        z-index: 1000; padding: 1rem;
+      `;
+
+      overlay.innerHTML = `
+        <div style="background:#1e1b3a; border:1px solid rgba(244,67,54,0.4); border-radius:16px; padding:2rem; max-width:480px; width:100%;">
+          <div style="font-size:1.3rem; font-weight:700; margin-bottom:0.5rem; color:#f44336;">⚠️ You're falling behind</div>
+          <p style="opacity:0.7; margin-bottom:1.2rem; font-size:0.9rem;">You have ${overdueDays.length} incomplete ${overdueDays.length === 1 ? "task" : "tasks"} from your study plan:</p>
+          <div style="max-height:280px; overflow-y:auto; margin-bottom:1.5rem;">
+            ${overdueDays.map(d => `
+              <div style="background:rgba(244,67,54,0.08); border:1px solid rgba(244,67,54,0.2); border-radius:10px; padding:0.8rem 1rem; margin-bottom:0.6rem;">
+                <div style="font-size:0.75rem; color:#f44336; font-weight:600; margin-bottom:0.2rem;">Day ${d.dayNumber} · Was due ${d.dueDate}</div>
+                <div style="font-size:0.88rem; line-height:1.4;">${d.task}</div>
+              </div>
+            `).join("")}
+          </div>
+          <div style="display:flex; gap:0.8rem;">
+            <button onclick="window.location.href='studyplan.html'" style="flex:1; background:#7c6ff7; color:white; border:none; padding:0.7rem; border-radius:8px; font-weight:600; cursor:pointer;">Go to Study Plan</button>
+            <button onclick="this.closest('div[style*=fixed]').remove()" style="background:rgba(255,255,255,0.1); color:white; border:none; padding:0.7rem 1.2rem; border-radius:8px; font-weight:600; cursor:pointer;">Dismiss</button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+    }
+
+    document.getElementById("navUsername").textContent = username || "";
+    document.getElementById("welcomeName").textContent = fullName || username || "";
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>

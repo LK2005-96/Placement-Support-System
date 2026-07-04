@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coding Practice | PlacementAI</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      color: white;
+    }
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 3rem;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+    }
+    .logo { font-size: 1.4rem; font-weight: 700; color: #7c6ff7; }
+    .btn-back {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: none;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2.5rem 2rem; }
+    h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .sub { opacity: 0.5; margin-bottom: 2rem; }
+    .setup-card {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    label { font-size: 0.85rem; opacity: 0.7; display: block; margin-bottom: 0.4rem; }
+    select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      color: white;
+      font-size: 0.95rem;
+      margin-bottom: 1.2rem;
+      outline: none;
+    }
+    select option { background: #302b63; }
+    .btn-primary {
+      background: #7c6ff7;
+      color: white;
+      border: none;
+      padding: 0.85rem 2rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: #6c5fe6; }
+    .btn-primary:disabled { background: #4a4580; cursor: not-allowed; }
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      display: none;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(124,111,247,0.3);
+      border-top-color: #7c6ff7;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading p { opacity: 0.6; margin-top: 1rem; }
+    .results { display: none; }
+    .result-card {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 1.8rem;
+      margin-bottom: 1.5rem;
+    }
+    .result-card h3 { color: #a78bfa; margin-bottom: 1rem; }
+    .result-card p {
+      opacity: 0.75;
+      line-height: 1.9;
+      font-size: 0.92rem;
+      white-space: pre-wrap;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(124,111,247,0.2);
+      border: 1px solid rgba(124,111,247,0.4);
+      color: #a78bfa;
+      padding: 0.2rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">🎯 PlacementAI</div>
+    <a href="dashboard.html" class="btn-back">← Dashboard</a>
+  </nav>
+
+  <div class="container">
+    <h1>💻 Coding Practice</h1>
+    <p class="sub">Get AI-curated coding topics and problems for your target company</p>
+
+    <div class="setup-card">
+      <label>Select Target Company</label>
+      <select id="company">
+        <option value="Wipro">Wipro</option>
+        <option value="Affordmed">Affordmed</option>
+        <option value="TCS">TCS</option>
+        <option value="Infosys">Infosys</option>
+        <option value="Accenture">Accenture</option>
+        <option value="Amazon">Amazon</option>
+        <option value="Google">Google</option>
+        <option value="BI3 Technologies">BI3 Technologies</option>
+      </select>
+
+      <label>Difficulty Level</label>
+      <select id="difficulty">
+        <option value="Easy to Medium">Easy to Medium</option>
+        <option value="Medium">Medium</option>
+        <option value="Medium to Hard">Medium to Hard</option>
+      </select>
+
+      <button class="btn-primary" id="getBtn" onclick="getRecommendations()">
+        Get Coding Recommendations
+      </button>
+    </div>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>AI is preparing your coding recommendations...</p>
+    </div>
+
+    <div class="results" id="results">
+      <div class="result-card">
+        <div class="badge" id="companyBadge"></div>
+        <h3>📚 Key Topics to Focus On</h3>
+        <p id="topics"></p>
+      </div>
+      <div class="result-card">
+        <h3>🧩 Recommended Problems</h3>
+        <p id="problems"></p>
+      </div>
+      <div class="result-card">
+        <h3>💡 Tips for This Company</h3>
+        <p id="tips"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem("token");
+    if (!token) window.location.href = "login.html";
+
+    async function getRecommendations() {
+      const company = document.getElementById("company").value;
+      const difficulty = document.getElementById("difficulty").value;
+      const btn = document.getElementById("getBtn");
+
+      btn.disabled = true;
+      btn.textContent = "Loading...";
+      document.getElementById("loading").style.display = "block";
+      document.getElementById("results").style.display = "none";
+
+      try {
+        const response = await fetch(
+          `/api/coding/recommend?targetCompany=${encodeURIComponent(company)}&difficulty=${encodeURIComponent(difficulty)}`,
+          {
+            method: "GET",
+            headers: { "Authorization": "Bearer " + token }
+          }
+        );
+
+        const data = await response.json();
+
+        document.getElementById("companyBadge").textContent = company;
+        document.getElementById("topics").textContent = data.topics;
+        document.getElementById("problems").textContent = data.problems;
+        document.getElementById("tips").textContent = data.tips;
+
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("results").style.display = "block";
+
+      } catch (err) {
+        alert("Something went wrong. Please try again.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Get Coding Recommendations";
+        document.getElementById("loading").style.display = "none";
+      }
+    }
+  </script>
+</body>
+</html>

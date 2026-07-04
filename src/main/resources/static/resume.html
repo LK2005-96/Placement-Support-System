@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Review | PlacementAI</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      color: white;
+    }
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 3rem;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+    }
+    .logo { font-size: 1.4rem; font-weight: 700; color: #7c6ff7; }
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+    .btn-back {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: none;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2.5rem 2rem; }
+    h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .sub { opacity: 0.5; margin-bottom: 2rem; }
+    .upload-box {
+      border: 2px dashed rgba(124,111,247,0.5);
+      border-radius: 16px;
+      padding: 3rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      transition: border 0.2s;
+      cursor: pointer;
+    }
+    .upload-box:hover { border-color: #7c6ff7; }
+    .upload-box .icon { font-size: 3rem; margin-bottom: 1rem; }
+    .upload-box p { opacity: 0.6; margin-bottom: 1.5rem; }
+    input[type="file"] { display: none; }
+    .btn-primary {
+      background: #7c6ff7;
+      color: white;
+      border: none;
+      padding: 0.85rem 2rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: #6c5fe6; }
+    .btn-primary:disabled { background: #4a4580; cursor: not-allowed; }
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      display: none;
+    }
+    .loading p { opacity: 0.6; margin-top: 1rem; }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(124,111,247,0.3);
+      border-top-color: #7c6ff7;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .results { display: none; }
+    .ats-score {
+      background: rgba(124,111,247,0.15);
+      border: 1px solid rgba(124,111,247,0.3);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .ats-score .score {
+      font-size: 4rem;
+      font-weight: 800;
+      color: #7c6ff7;
+    }
+    .ats-score .label { opacity: 0.6; margin-top: 0.3rem; }
+    .result-card {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 1.8rem;
+      margin-bottom: 1.5rem;
+    }
+    .result-card h3 {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      color: #a78bfa;
+    }
+    .roadmap-list {
+      padding-left: 1.3rem;
+      opacity: 0.85;
+    }
+    .roadmap-list li {
+      line-height: 1.8;
+      font-size: 0.92rem;
+      margin-bottom: 0.6rem;
+    }
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .tag {
+      background: rgba(124,111,247,0.15);
+      border: 1px solid rgba(124,111,247,0.3);
+      color: #b3a9fc;
+      font-size: 0.82rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+    }
+    .result-card p {
+      opacity: 0.75;
+      line-height: 1.8;
+      font-size: 0.92rem;
+      white-space: pre-wrap;
+    }
+    .result-card p {
+      opacity: 0.75;
+      line-height: 1.8;
+      font-size: 0.92rem;
+      white-space: pre-wrap;
+    }
+    .file-name {
+      opacity: 0.6;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">🎯 PlacementAI</div>
+    <div class="nav-right">
+      <a href="dashboard.html" class="btn-back">← Dashboard</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h1>📄 Resume Review</h1>
+    <p class="sub">Upload your PDF resume and get instant AI-powered feedback</p>
+
+    <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+      <div class="icon">☁️</div>
+      <p>Click to upload your resume (PDF only)</p>
+      <button class="btn-primary" type="button">Choose PDF File</button>
+      <p class="file-name" id="fileName">No file chosen</p>
+    </div>
+
+    <input type="file" id="fileInput" accept=".pdf" onchange="fileSelected()">
+
+    <div style="text-align:center;">
+      <button class="btn-primary" id="uploadBtn" onclick="uploadResume()" disabled>
+        Analyse Resume
+      </button>
+    </div>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>AI is analysing your resume... this may take 30-60 seconds</p>
+    </div>
+
+    <div class="results" id="results">
+      <div class="ats-score">
+        <div class="score" id="atsScore">--</div>
+        <div class="label">ATS Score / 100</div>
+      </div>
+
+      <div class="result-card">
+        <h3>📝 AI Review</h3>
+        <p id="aiReview"></p>
+      </div>
+
+      <div class="result-card">
+        <h3>🔍 Skill Gap Analysis</h3>
+        <div id="skillGap" class="tag-list"></div>
+      </div>
+
+      <div class="result-card">
+        <h3>🗺️ Your Learning Roadmap</h3>
+        <ol id="roadmap" class="roadmap-list"></ol>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem("token");
+    if (!token) window.location.href = "login.html";
+
+    let selectedFile = null;
+
+    function fileSelected() {
+      const input = document.getElementById("fileInput");
+      selectedFile = input.files[0];
+      if (selectedFile) {
+        document.getElementById("fileName").textContent = selectedFile.name;
+        document.getElementById("uploadBtn").disabled = false;
+      }
+    }
+
+    async function uploadResume() {
+      if (!selectedFile) return;
+
+      const btn = document.getElementById("uploadBtn");
+      btn.disabled = true;
+      btn.textContent = "Analysing...";
+      document.getElementById("loading").style.display = "block";
+      document.getElementById("results").style.display = "none";
+
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      try {
+        const response = await fetch("/api/resume/upload", {
+          method: "POST",
+          headers: { "Authorization": "Bearer " + token },
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          alert("Upload failed: " + (data.message || "Unknown error"));
+          return;
+        }
+
+        document.getElementById("atsScore").textContent = data.atsScore;
+        document.getElementById("aiReview").textContent = data.aiReview;
+
+        const skills = data.skillGapAnalysis
+          .split(/,(?![^(]*\))/)
+          .map(s => s.trim())
+          .filter(s => s.length > 0);
+        document.getElementById("skillGap").innerHTML = skills
+          .map(s => `<span class="tag">${s}</span>`)
+          .join("");
+
+        const steps = data.roadmap
+          .split(/\d+\.\s+/)
+          .map(s => s.trim())
+          .filter(s => s.length > 0);
+        document.getElementById("roadmap").innerHTML = steps
+          .map(s => `<li>${s}</li>`)
+          .join("");
+
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("results").style.display = "block";
+
+      } catch (err) {
+        alert("Something went wrong. Please try again.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Analyse Resume";
+        document.getElementById("loading").style.display = "none";
+      }
+    }
+  </script>
+</body>
+</html>
